@@ -12,19 +12,18 @@ from selenium import webdriver
 
 class FunctionalTest(StaticLiveServerTestCase):
     def setUp(self):
-        pass
-        #self.browser = webdriver.Firefox()
+        self.browser = webdriver.Firefox()
     
     def tearDown(self):
-        pass
-        #self.browser.quit()
+        self.browser.quit()
     
-    @skip
     @override_settings(DEBUG=True)
     def test_django_installed(self):
         self.browser.get(self.live_server_url)
         time.sleep(4)
         self.assertIn('Django', self.browser.title)
+
+class FunctionalRESTTest(StaticLiveServerTestCase):
 
     def test_user_can_register_and_login(self):
         client = APIClient()
@@ -53,6 +52,7 @@ class FunctionalTest(StaticLiveServerTestCase):
         self.assertEquals(201, response.status_code)
         self.assertIn('testing@mail.com', response.data['email'])
 
+        self.fail("End Testing")
         # User gets the registration email from their mailbox
         email = mail.outbox[0]
         uid = "xyz"
