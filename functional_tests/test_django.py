@@ -27,17 +27,35 @@ class FunctionalTest(StaticLiveServerTestCase):
 
 class FunctionalRESTTest(StaticLiveServerTestCase):
     def setUp(self):
-        ## TODO: Figure out why this is not login-able once set up.
-        User = get_user_model()
-        self.other_user = User()
-        self.other_user.email = "otheruser@mail.com"
-        self.other_user.name = "Other User"
-        self.other_user.password = "Password01"
-        self.other_user.is_active = True
-        self.other_user.save()
+        self.client = APIClient()
+        self.other_user = {
+            'email': "otheruser@mail.com",
+            'name': "Other User",
+            'password': "Password01",
+        }
+        test_user = get_user_model().objects.create_user(self.other_user['email'], password=self.other_user['password'])
+        test_user.name = self.other_user['name']
+        test_user.save()
+    
+    def create_jwt(self, email, password):
+        return self.client.post(
+            '/auth/jwt/create/',
+            {
+                'email': email,
+                'password': password
+            },
+            format='json'
+        )
+    
+    def check_me_endpoint(self, user_name, user_jwt):
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + user_jwt)
+        response = self.client.get(
+            '/auth/me/',
+        )
+        self.assertEquals(200, response.status_code)
+        self.assertEquals(user_name, response.data['name'])
 
     def test_user_can_register_and_login(self):
-        client = APIClient()
         user = {
             'email': 'testing@mail.com',
             'name': 'Tester01',
@@ -46,7 +64,7 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         }
 
         # User then tries to create user with an email and not a username
-        response = client.post(
+        response = self.client.post(
             '/auth/users/create/',
             {
                 'email': user['email'],
@@ -65,7 +83,7 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         token = search.group(2)
 
         # User verifies the activation by posting to the activate endpoint
-        response = client.post(
+        response = self.client.post(
             '/auth/users/activate/',
             {
                 'uid': uid,
@@ -78,40 +96,128 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         self.assertIn('Your account has been created', confirmation_email.body)
 
         # User users their newly activated account to create a JWT
-        response = client.post(
-            '/auth/jwt/create/',
-            {
-                'email': user['email'],
-                'password': user['password']
-            },
-            format='json'
-        )
+        
+        response = self.create_jwt(user['email'], user['password'])
         self.assertEquals(200, response.status_code)
         self.assertIn('token', response.data)
         user['jwt'] = response.data['token']
         
         # User can use the new JWT to make a series of authenticated requests, such as the user endpoint
-        client.credentials(HTTP_AUTHORIZATION='JWT ' + user['jwt'])
-        response = client.get(
-            '/auth/me/',
-        )
-        self.assertEquals(200, response.status_code)
-        self.assertEquals(user['name'], response.data['name'])
+        self.check_me_endpoint(user['name'], user['jwt'])
     
-    @skip
-    def test_user_can_reset_password(self):
-        pass
-        # Using the user created in setUp make request to password reset endpoint.
-        # Intercept the password email
-        # Make call to password change endpoint
-        # login with new password.
-    
-    @skip
     def test_user_can_change_password(self):
-        pass
-        # Using the user created in setUp, login
-        # make call to change password endpoint
-        # logout
-        # login with new password.
+        # Pre-existing user logs in by asking for a JWT
+        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        self.assertEquals(200, response.status_code)
+        self.assertIn('token', response.data)
+        self.other_user['jwt'] = response.data['token']
 
-        # test if passing auth token to an is authenticated view will work or if more needs to be done.
+        # User wants to change their password, so they call the password change endpoint.
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
+        new_password = 'Password02'
+        response = self.client.post(
+            '/auth/password/',
+            {
+                "new_password": new_password,
+                "re_new_password": new_password,
+                "current_password": self.other_user['password']
+            },
+            format='json'
+        )
+        self.assertEquals(204, response.status_code)
+
+        # Once complete, user ensures the old password no longer works
+        self.client.credentials()
+        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        self.assertEquals(400, response.status_code)
+
+        # User logs in with their new password.
+        response = self.create_jwt(self.other_user['email'], new_password)
+        self.assertEquals(200, response.status_code)
+        self.assertIn('token', response.data)
+        self.other_user['jwt'] = response.data['token']
+
+        # User gets their profile information
+        self.check_me_endpoint(self.other_user['name'], self.other_user['jwt'])
+    
+    def test_user_can_reset_password(self):
+        # User want to reset their password as they have forgotten it.
+        # User makes call to the forgotten password endpoint
+        response = self.client.post(
+            '/auth/password/reset/',
+            {'email': self.other_user['email']}
+        )
+        self.assertEqual(204, response.status_code)
+
+        # User retrieves the email from their inbox.
+        reset_email = mail.outbox[0]
+        search = re.search('#\/password\/reset\/confirm\/(.*?)\/(.*?)\\n', reset_email.body)
+        uid = search.group(1)
+        token = search.group(2)
+
+        # User makes call to the reset confirm endpoint with uid, token and new password
+        new_password = 'Password02'
+        response = self.client.post(
+            '/auth/password/reset/confirm/',
+            {
+                "uid": uid,
+                "token": token,
+                "new_password": new_password
+            }
+        )
+        self.assertEqual(204, response.status_code)
+
+        # User cannot log in with old password
+        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        self.assertEqual(400, response.status_code)
+        self.assertNotIn('token', response.data)
+
+        # User can now create a JWT with the new password
+        response = self.create_jwt(self.other_user['email'], new_password)
+        self.assertEqual(200, response.status_code)
+        self.assertIn('token', response.data)
+        self.other_user['jwt'] = response.data['token']
+
+        # User can now see their details with the created JWT.
+        self.check_me_endpoint(self.other_user['name'], self.other_user['jwt'])
+
+    @skip
+    def test_user_can_change_email_address(self):
+        pass
+        # Existing User logs in by creating JWT
+
+        # User posts to the change email address endpoint
+
+        # Email?
+
+        # User cannot log in with old email
+
+        # User can log in with new email address.
+    
+    @skip
+    def test_can_delete_user(self):
+        pass
+        # Existing User logs in by creating new JWT.
+
+        # User posts to delete endpoint, allowing them to remove their user credenetials
+
+        # User's related details should not delete. No CASCADE!
+
+        # User can not log in with existing details.
+    
+    @skip
+    def test_can_refresh_and_verify_jwt(self):
+        pass
+        # Existing User logs in by creating new JWT.
+
+        # User verify's the JWT that was created.
+
+        # Change JWT payload by one char, verify should now not work.
+
+        # User can then refresh originally generated JWT.
+
+        # User can log in with newly refreshed JWT.
+
+    ## Abstract the me call
+    ## Abstract the email get + regex
+    ## Abstract the auth set
