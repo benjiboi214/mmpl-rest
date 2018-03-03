@@ -228,28 +228,6 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         self.assertIn('token', response.data)
         self.other_user['jwt'] = response.data['token']
     
-    @skip
-    def test_can_delete_user(self):
-        # Existing User logs in by creating new JWT.
-        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
-        self.assertEqual(200, response.status_code)
-        self.assertIn('token', response.data)
-        self.other_user['jwt'] = response.data['token']
-
-        # User posts to delete endpoint, allowing them to remove their user credentials
-        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
-        self.client.post(
-            '/auth/users/delete/',
-            {
-                'current_password': self.other_user['password']
-            }
-        )
-        import pdb; pdb.set_trace()
-
-        # User's related details should not delete. No CASCADE!
-
-        # User can not log in with existing details.
-    
     def test_can_refresh_and_verify_jwt(self):
         # Existing User logs in by creating new JWT.
         response = self.create_jwt(self.other_user['email'], self.other_user['password'])

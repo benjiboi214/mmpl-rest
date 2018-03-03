@@ -15,11 +15,11 @@ Including another URLconf
 """
 from django.contrib import admin
 from django.urls import path, include
-from django.views import defaults
-from django.http import Http404
+from auth.views import user_delete_view
 
 urlpatterns = [
     path('admin/', admin.site.urls),
+    path('auth/users/delete/', user_delete_view),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
 ]
