@@ -229,6 +229,7 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         self.assertIn('token', response.data)
         self.other_user['jwt'] = response.data['token']
     
+    @skip
     def test_can_delete_user(self):
         # Existing User logs in by creating new JWT.
         response = self.create_jwt(self.other_user['email'], self.other_user['password'])
@@ -250,15 +251,46 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
 
         # User can not log in with existing details.
     
-    @skip
     def test_can_refresh_and_verify_jwt(self):
-        pass
         # Existing User logs in by creating new JWT.
+        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        self.assertEqual(200, response.status_code)
+        self.assertIn('token', response.data)
+        self.other_user['jwt'] = response.data['token']
 
         # User verify's the JWT that was created.
+        response = self.client.post(
+            '/auth/jwt/verify/',
+            {
+                "token": self.other_user['jwt']
+            },
+            format="json"
+        )
+        self.assertEqual(200, response.status_code)
 
         # Change JWT payload by one char, verify should now not work.
+        invalid_jwt = self.other_user['jwt'][:-1]
+        response = self.client.post(
+            '/auth/jwt/verify/',
+            {
+                "token": invalid_jwt
+            },
+            format="json"
+        )
+        self.assertEqual(400, response.status_code)
 
         # User can then refresh originally generated JWT.
+        response = self.client.post(
+            '/auth/jwt/refresh/',
+            {
+                "token": self.other_user['jwt']
+            },
+            format="json"
+        )
+        self.assertEqual(200, response.status_code)
+        self.assertIn('token', response.data)
+        self.other_user['jwt'] = response.data['token']
 
-        # User can log in with newly refreshed JWT.
+        # User can see the me endpoint with newly refresh JWT!
+        self.check_me_endpoint(self.other_user['name'], self.other_user['jwt'])
+
