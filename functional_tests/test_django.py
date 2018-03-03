@@ -2,9 +2,8 @@ import re
 import time
 from unittest import skip
 
-from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.contrib.auth import get_user_model
-
+from django.contrib.staticfiles.testing import StaticLiveServerTestCase
 from django.core import mail
 from django.test.utils import override_settings
 from rest_framework.test import APIClient
@@ -293,4 +292,3 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
 
         # User can see the me endpoint with newly refresh JWT!
         self.check_me_endpoint(self.other_user['name'], self.other_user['jwt'])
-
