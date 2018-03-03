@@ -47,6 +47,13 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
             format='json'
         )
     
+    def get_uid_and_token_from_email(self, regex, email_index):
+        email = mail.outbox[email_index]
+        search = re.search(regex, email.body)
+        uid = search.group(1)
+        token = search.group(2)
+        return (uid, token)
+
     def check_me_endpoint(self, user_name, user_jwt):
         self.client.credentials(HTTP_AUTHORIZATION='JWT ' + user_jwt)
         response = self.client.get(
@@ -77,10 +84,7 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         self.assertIn(user['email'], response.data['email'])
 
         # User gets the registration email from their mailbox
-        activation_email = mail.outbox[0]
-        search = re.search('#\/activate\/(.*?)\/(.*?)\\n', activation_email.body)
-        uid = search.group(1)
-        token = search.group(2)
+        uid, token = self.get_uid_and_token_from_email('#\/activate\/(.*?)\/(.*?)\\n', 0)
 
         # User verifies the activation by posting to the activate endpoint
         response = self.client.post(
@@ -96,7 +100,6 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         self.assertIn('Your account has been created', confirmation_email.body)
 
         # User users their newly activated account to create a JWT
-        
         response = self.create_jwt(user['email'], user['password'])
         self.assertEquals(200, response.status_code)
         self.assertIn('token', response.data)
@@ -130,6 +133,7 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         self.client.credentials()
         response = self.create_jwt(self.other_user['email'], self.other_user['password'])
         self.assertEquals(400, response.status_code)
+        self.assertNotIn('token', response.data)
 
         # User logs in with their new password.
         response = self.create_jwt(self.other_user['email'], new_password)
@@ -150,10 +154,7 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         self.assertEqual(204, response.status_code)
 
         # User retrieves the email from their inbox.
-        reset_email = mail.outbox[0]
-        search = re.search('#\/password\/reset\/confirm\/(.*?)\/(.*?)\\n', reset_email.body)
-        uid = search.group(1)
-        token = search.group(2)
+        uid, token = self.get_uid_and_token_from_email('#\/password\/reset\/confirm\/(.*?)\/(.*?)\\n', 0)
 
         # User makes call to the reset confirm endpoint with uid, token and new password
         new_password = 'Password02'
@@ -163,7 +164,8 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
                 "uid": uid,
                 "token": token,
                 "new_password": new_password
-            }
+            },
+            format='json'
         )
         self.assertEqual(204, response.status_code)
 
@@ -181,18 +183,52 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         # User can now see their details with the created JWT.
         self.check_me_endpoint(self.other_user['name'], self.other_user['jwt'])
 
-    @skip
     def test_user_can_change_email_address(self):
-        pass
         # Existing User logs in by creating JWT
+        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        self.assertEqual(200, response.status_code)
+        self.assertIn('token', response.data)
+        self.other_user['jwt'] = response.data['token']
 
         # User posts to the change email address endpoint
+        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
+        new_email = 'test2@mail.com'
+        response = self.client.post(
+            '/auth/email/',
+            {
+                "current_password": self.other_user['password'],
+                "new_email": new_email,
+                "re_new_email": new_email
+            },
+            format='json'
+        )
+        self.assertEqual(204, response.status_code)
 
-        # Email?
+        # User gets the UID and Token from the activation email
+        uid, token = self.get_uid_and_token_from_email('#\/activate\/(.*?)\/(.*?)\\n', 0)
+        self.client.credentials()
+        response = self.client.post(
+            '/auth/users/activate/',
+            {
+                'uid': uid,
+                'token': token
+            },
+            format='json'
+        )
+        self.assertEquals(204, response.status_code)
+        confirmation_email = mail.outbox[1]
+        self.assertIn('Your account has been created', confirmation_email.body)
 
         # User cannot log in with old email
+        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        self.assertEqual(400, response.status_code)
+        self.assertNotIn('token', response.data)
 
         # User can log in with new email address.
+        response = self.create_jwt(new_email, self.other_user['password'])
+        self.assertEqual(200, response.status_code)
+        self.assertIn('token', response.data)
+        self.other_user['jwt'] = response.data['token']
     
     @skip
     def test_can_delete_user(self):
@@ -217,7 +253,3 @@ class FunctionalRESTTest(StaticLiveServerTestCase):
         # User can then refresh originally generated JWT.
 
         # User can log in with newly refreshed JWT.
-
-    ## Abstract the me call
-    ## Abstract the email get + regex
-    ## Abstract the auth set

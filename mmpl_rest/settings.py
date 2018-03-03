@@ -131,6 +131,7 @@ AUTH_USER_MODEL = 'authtools.User'
 # Rest Framework settings
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
+        'rest_framework.authentication.BasicAuthentication',
         # JWT Rest Auth Class for Djoser
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
@@ -142,6 +143,7 @@ DJOSER = {
     'SEND_ACTIVATION_EMAIL': True,
     'SEND_CONFIRMATION_EMAIL': True,
     'SET_PASSWORD_RETYPE': True,
+    'SET_USERNAME_RETYPE': True,
 }
 
 EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'
