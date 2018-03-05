@@ -41,6 +41,7 @@ INSTALLED_APPS = [
     'rest_framework',
     'authtools',
     'djoser',
+    'utils'
 ]
 
 MIDDLEWARE = [
@@ -126,7 +127,7 @@ STATIC_URL = '/static/'
 ## Auth Settings
 
 # Set the custom user model with the email Base User.
-AUTH_USER_MODEL = 'authtools.User'
+AUTH_USER_MODEL = 'utils.User'
 
 # Rest Framework settings
 REST_FRAMEWORK = {
