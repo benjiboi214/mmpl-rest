@@ -41,7 +41,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'authtools',
     'djoser',
-    'utils'
+    'utils',
+    'userprofile'
 ]
 
 MIDDLEWARE = [
