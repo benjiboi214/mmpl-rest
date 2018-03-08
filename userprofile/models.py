@@ -9,3 +9,7 @@ class Profile(models.Model):
         on_delete=models.SET_NULL,
         null=True
     )
+    address = models.CharField(
+        max_length=200,
+        blank=True
+    )
