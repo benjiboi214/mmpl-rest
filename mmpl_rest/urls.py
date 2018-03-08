@@ -22,4 +22,5 @@ urlpatterns = [
     path('auth/users/delete/', user_delete_view),
     path('auth/', include('djoser.urls')),
     path('auth/', include('djoser.urls.jwt')),
+    path('players/', include('userprofile.urls')),
 ]

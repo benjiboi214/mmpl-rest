@@ -16,9 +16,14 @@ class PlayerFunctionalTests(FunctionalRestTest):
         self.other_user['jwt'] = response.data['token']
         self.client.credentials(HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
 
-        # Once logged in, user has access to their player profile
+        # Once logged in, user has access to their player profile and can see that it is empty.
         response = self.client.get(
             '/players/me/',
             format='json'
         )
         self.assertEqual(200, response.status_code)
+        self.assertEqual('', response.data['address'])
+
+        # User can post and update the address on their profile
+
+        # Unauthenticated user cannot access same endpoint.
