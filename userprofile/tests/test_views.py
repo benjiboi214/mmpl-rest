@@ -22,7 +22,6 @@ class TestPlayerView(TestCase):
         self.view = MyProfileDetail.as_view()
 
     def test_view_available_to_authenticated_user(self):
-        # testing the authentication class is present
         request = self.factory.get('/profiles/me')
         force_authenticate(request, self.user)
         response = self.view(request)
@@ -34,12 +33,10 @@ class TestPlayerView(TestCase):
         self.assertEqual(401, response.status_code)
     
     def test_get_profile_method_success(self):
-        # test helper method for getting the profile based on the user rtequest when it should succeed.
         user_profile = MyProfileDetail.get_player_object(self, self.user)
         self.assertEqual(self.user.profile, user_profile)
     
     def test_get_profile_method_failure(self):
-        # test helper method for getting the profile based on the user request when it should fail.
         user = get_user_model().objects.create()
         user_profile = MyProfileDetail.get_player_object(self, user)
         self.assertEqual(user.profile, user_profile)
