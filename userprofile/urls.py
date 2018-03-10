@@ -7,5 +7,5 @@ from userprofile import views
 # # Can be done with the readonly viewset
 
 urlpatterns = [
-    path('me/', views.player_me_detail, name='player_me_detail')
+    path('me/', views.MyProfileDetail.as_view(), name='player_me_detail')
 ]

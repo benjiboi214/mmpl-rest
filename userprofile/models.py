@@ -7,7 +7,8 @@ class Profile(models.Model):
     user = models.OneToOneField(
         settings.AUTH_USER_MODEL,
         on_delete=models.SET_NULL,
-        null=True
+        null=True,
+        related_name="profile"
     )
     address = models.CharField(
         max_length=200,
