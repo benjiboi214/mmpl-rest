@@ -1,25 +1,13 @@
 from django.contrib.auth import get_user_model
-from django.test import TestCase
 from rest_framework import permissions
-from rest_framework.test import force_authenticate, APIRequestFactory
+from rest_framework.test import APIRequestFactory, force_authenticate
 
 from userprofile.views import MyProfileDetail
 
+from .base import UserProfileBaseTest
 
-class TestPlayerView(TestCase):
-    def setUp(self):
-        self.user_details = {
-            'email': "otheruser@mail.com",
-            'name': "Other User",
-            'password': "Password01",
-        }
-        self.user = get_user_model().objects.create_user(
-            self.user_details['email'],
-            password=self.user_details['password'],
-            name=self.user_details['name']
-        )
-        self.user.profile.address = '123 Fake St'
-        self.user.profile.save()
+
+class TestPlayerView(UserProfileBaseTest):
     
     def get_view_response(self, action, data=None, authenticate=False):
         factory = APIRequestFactory()
