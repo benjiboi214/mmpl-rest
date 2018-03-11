@@ -4,17 +4,18 @@ from django.utils.translation import ugettext_lazy as _
 from userprofile.models import Profile
 
 
-class UserManager(UserManager):
+class CustomUserManager(UserManager):
 
     def create_user(self, email, password=None, **kwargs):
-        user = super(UserManager, self).create_user(email, password, **kwargs)
+        user = super(CustomUserManager, self).create_user(
+            email, password, **kwargs)
         profile = Profile.objects.create(user=user)
         profile.save()
         return user
 
 
 class User(AbstractNamedUser):
-    objects = UserManager()
+    objects = CustomUserManager()
 
     class Meta(AbstractNamedUser.Meta):
         swappable = 'AUTH_USER_MODEL'

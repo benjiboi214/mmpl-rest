@@ -12,11 +12,14 @@ class PlayerFunctionalTests(FunctionalRestTest):
 
     def test_player_profile_can_be_edited(self):
         # User logs in
-        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        response = self.create_jwt(
+            self.other_user['email'], self.other_user['password'])
         self.other_user['jwt'] = response.data['token']
-        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
+        self.client.credentials(
+            HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
 
-        # Once logged in, user has access to their player profile and can see that it is empty.
+        # Once logged in, user has access to their
+        # player profile and can see that it is empty.
         response = self.client.get(
             '/players/me/',
             format='json'

@@ -30,7 +30,8 @@ class AuthFunctionalTests(FunctionalRestTest):
         self.assertIn(user['email'], response.data['email'])
 
         # User gets the registration email from their mailbox
-        uid, token = self.get_uid_and_token_from_email('#\/activate\/(.*?)\/(.*?)\\n', 0)
+        uid, token = self.get_uid_and_token_from_email(
+            '#\/activate\/(.*?)\/(.*?)\\n', 0)
 
         # User verifies the activation by posting to the activate endpoint
         response = self.client.post(
@@ -50,19 +51,23 @@ class AuthFunctionalTests(FunctionalRestTest):
         self.assertEquals(200, response.status_code)
         self.assertIn('token', response.data)
         user['jwt'] = response.data['token']
-        
-        # User can use the new JWT to make a series of authenticated requests, such as the user endpoint
+
+        # User can use the new JWT to make a series of authenticateds
+        # requests, such as the user endpoint
         self.check_me_endpoint(user['name'], user['jwt'])
-    
+
     def test_user_can_change_password(self):
         # Pre-existing user logs in by asking for a JWT
-        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        response = self.create_jwt(
+            self.other_user['email'], self.other_user['password'])
         self.assertEquals(200, response.status_code)
         self.assertIn('token', response.data)
         self.other_user['jwt'] = response.data['token']
 
-        # User wants to change their password, so they call the password change endpoint.
-        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
+        # User wants to change their password, so they
+        # call the password change endpoint.
+        self.client.credentials(
+            HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
         new_password = 'Password02'
         response = self.client.post(
             '/auth/password/',
@@ -77,7 +82,8 @@ class AuthFunctionalTests(FunctionalRestTest):
 
         # Once complete, user ensures the old password no longer works
         self.client.credentials()
-        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        response = self.create_jwt(
+            self.other_user['email'], self.other_user['password'])
         self.assertEquals(400, response.status_code)
         self.assertNotIn('token', response.data)
 
@@ -89,7 +95,7 @@ class AuthFunctionalTests(FunctionalRestTest):
 
         # User gets their profile information
         self.check_me_endpoint(self.other_user['name'], self.other_user['jwt'])
-    
+
     def test_user_can_reset_password(self):
         # User makes call to the forgotten password endpoint
         response = self.client.post(
@@ -99,9 +105,11 @@ class AuthFunctionalTests(FunctionalRestTest):
         self.assertEqual(204, response.status_code)
 
         # User retrieves the email from their inbox.
-        uid, token = self.get_uid_and_token_from_email('#\/password\/reset\/confirm\/(.*?)\/(.*?)\\n', 0)
+        uid, token = self.get_uid_and_token_from_email(
+            '#\/password\/reset\/confirm\/(.*?)\/(.*?)\\n', 0)
 
-        # User makes call to the reset confirm endpoint with uid, token and new password
+        # User makes call to the reset confirm endpoint
+        # with uid, token and new password
         new_password = 'Password02'
         response = self.client.post(
             '/auth/password/reset/confirm/',
@@ -115,7 +123,8 @@ class AuthFunctionalTests(FunctionalRestTest):
         self.assertEqual(204, response.status_code)
 
         # User cannot log in with old password
-        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        response = self.create_jwt(
+            self.other_user['email'], self.other_user['password'])
         self.assertEqual(400, response.status_code)
         self.assertNotIn('token', response.data)
 
@@ -130,13 +139,15 @@ class AuthFunctionalTests(FunctionalRestTest):
 
     def test_user_can_change_email_address(self):
         # Existing User logs in by creating JWT
-        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        response = self.create_jwt(
+            self.other_user['email'], self.other_user['password'])
         self.assertEqual(200, response.status_code)
         self.assertIn('token', response.data)
         self.other_user['jwt'] = response.data['token']
 
         # User posts to the change email address endpoint
-        self.client.credentials(HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
+        self.client.credentials(
+            HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
         new_email = 'test2@mail.com'
         response = self.client.post(
             '/auth/email/',
@@ -150,7 +161,8 @@ class AuthFunctionalTests(FunctionalRestTest):
         self.assertEqual(204, response.status_code)
 
         # User gets the UID and Token from the activation email
-        uid, token = self.get_uid_and_token_from_email('#\/activate\/(.*?)\/(.*?)\\n', 0)
+        uid, token = self.get_uid_and_token_from_email(
+            '#\/activate\/(.*?)\/(.*?)\\n', 0)
         self.client.credentials()
         response = self.client.post(
             '/auth/users/activate/',
@@ -165,7 +177,8 @@ class AuthFunctionalTests(FunctionalRestTest):
         self.assertIn('Your account has been created', confirmation_email.body)
 
         # User cannot log in with old email
-        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        response = self.create_jwt(
+            self.other_user['email'], self.other_user['password'])
         self.assertEqual(400, response.status_code)
         self.assertNotIn('token', response.data)
 
@@ -174,10 +187,11 @@ class AuthFunctionalTests(FunctionalRestTest):
         self.assertEqual(200, response.status_code)
         self.assertIn('token', response.data)
         self.other_user['jwt'] = response.data['token']
-    
+
     def test_can_refresh_and_verify_jwt(self):
         # Existing User logs in by creating new JWT.
-        response = self.create_jwt(self.other_user['email'], self.other_user['password'])
+        response = self.create_jwt(
+            self.other_user['email'], self.other_user['password'])
         self.assertEqual(200, response.status_code)
         self.assertIn('token', response.data)
         self.other_user['jwt'] = response.data['token']

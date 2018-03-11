@@ -125,7 +125,7 @@ USE_TZ = True
 
 STATIC_URL = '/static/'
 
-## Auth Settings
+# Auth Settings
 
 # Set the custom user model with the email Base User.
 AUTH_USER_MODEL = 'utils.User'

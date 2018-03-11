@@ -6,7 +6,7 @@ class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
         fields = ['address']
-    
+
     # What to test on a serializer?
     # Compare serializer.Meta.model to the model we're setting
     # Compare the fields that are available are in the serializer

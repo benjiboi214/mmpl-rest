@@ -14,10 +14,12 @@ class FunctionalRestTest(StaticLiveServerTestCase):
             'name': "Other User",
             'password': "Password01",
         }
-        test_user = get_user_model().objects.create_user(self.other_user['email'], password=self.other_user['password'])
+        test_user = get_user_model().objects.create_user(
+            self.other_user['email'],
+            password=self.other_user['password'])
         test_user.name = self.other_user['name']
         test_user.save()
-    
+
     def create_jwt(self, email, password):
         return self.client.post(
             '/auth/jwt/create/',
@@ -27,7 +29,7 @@ class FunctionalRestTest(StaticLiveServerTestCase):
             },
             format='json'
         )
-    
+
     def get_uid_and_token_from_email(self, regex, email_index):
         email = mail.outbox[email_index]
         search = re.search(regex, email.body)
