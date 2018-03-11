@@ -25,8 +25,13 @@ class PlayerFunctionalTests(FunctionalRestTest):
             format='json'
         )
         self.assertEqual(200, response.status_code)
-        self.assertEqual('', response.data['address'])
-
+        self.assertEqual({
+            'address': '',
+            'date_of_birth': None,
+            'phone_number': '',
+            'umpire_accreditation': 'N',
+        }, response.data)
+        #import pdb; pdb.set_trace()
         # User can post and update the address on their profile
 
         # Unauthenticated user cannot access same endpoint.

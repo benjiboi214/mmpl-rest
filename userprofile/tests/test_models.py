@@ -18,7 +18,8 @@ class TestPlayerView(UserProfileBaseTest):
         profile.refresh_from_db()
         self.assertIsNone(profile.user)
 
-    def test_can_set_address_field(self):
-        profile = Profile.objects.create(address="123 Fake St")
-        profile.save()
-        self.assertEqual(profile.address, '123 Fake St')
+    def test_string_representation(self):
+        self.assertEqual(self.user_details['name'], str(self.user.profile))
+
+    def test_verbose_name_plural(self):
+        self.assertEqual(str(Profile._meta.verbose_name_plural), "profiles")

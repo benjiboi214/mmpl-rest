@@ -5,7 +5,12 @@ from .models import Profile
 class ProfileSerializer(serializers.ModelSerializer):
     class Meta:
         model = Profile
-        fields = ['address']
+        fields = [
+            'address',
+            'date_of_birth',
+            'phone_number',
+            'umpire_accreditation'
+        ]
 
     # What to test on a serializer?
     # Compare serializer.Meta.model to the model we're setting
