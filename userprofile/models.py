@@ -1,12 +1,12 @@
-import uuid as uuid_lib
-
 from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.contrib.auth import get_user_model
-from django.db import models as models
+from django.db import models
+from utils.models import TimeStampedUuidModel
 
 
-class Profile(models.Model):
+class Profile(TimeStampedUuidModel):
+
     # Choices
     UMPIRE_ACCREDITATION_CHOICES = (
         ('N', 'None'),
@@ -15,15 +15,6 @@ class Profile(models.Model):
         ('C', 'C Grade'),
         ('D', 'D Grade'),
         ('E', 'E Grade')
-    )
-
-    # System
-    created = models.DateTimeField(auto_now_add=True, editable=False)
-    last_updated = models.DateTimeField(auto_now=True, editable=False)
-    uuid = models.UUIDField(
-        db_index=True,
-        default=uuid_lib.uuid4,
-        editable=False
     )
 
     # Fields
@@ -48,9 +39,6 @@ class Profile(models.Model):
         on_delete=models.SET_NULL,
         null=True,
         related_name="profile")
-
-    class Meta:
-        ordering = ('-created',)
 
     def __unicode__(self):
         return u'%s' % self.user.name
