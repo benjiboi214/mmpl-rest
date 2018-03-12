@@ -1,15 +1,17 @@
-from rest_framework import serializers
 from .models import Profile
+from utils.serializers import DefaultModelSerializer
 
 
-class ProfileSerializer(serializers.ModelSerializer):
+class ProfileSerializer(DefaultModelSerializer):
     class Meta:
         model = Profile
         fields = [
             'address',
             'date_of_birth',
             'phone_number',
-            'umpire_accreditation'
+            'umpire_accreditation',
+            'created',
+            'last_updated'
         ]
 
     # What to test on a serializer?

@@ -25,13 +25,18 @@ class PlayerFunctionalTests(FunctionalRestTest):
             format='json'
         )
         self.assertEqual(200, response.status_code)
-        self.assertEqual({
-            'address': '',
-            'date_of_birth': None,
-            'phone_number': '',
-            'umpire_accreditation': 'N',
-        }, response.data)
-        #import pdb; pdb.set_trace()
+        self.assertIn('address', response.data)
+
         # User can post and update the address on their profile
+        response = self.client.put(
+            '/players/me/',
+            {
+                'address': '123 Fake Street, Melbourne',
+                'date_of_birth': '1992-04-21',
+                'phone_number': '0429 227 281',
+                'umpire_accreditation': 'A'
+            },
+            format='json'
+        )
 
         # Unauthenticated user cannot access same endpoint.

@@ -18,7 +18,9 @@ class Profile(models.Model):
     # Fields
     created = models.DateTimeField(auto_now_add=True, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
-    address = models.CharField(max_length=200)
+    address = models.CharField(
+        max_length=200,
+        blank=True)
     phone_number = models.CharField(
         max_length=30,
         blank=True)

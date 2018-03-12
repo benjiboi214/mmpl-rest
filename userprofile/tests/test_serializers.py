@@ -12,3 +12,7 @@ class ProfileSerializerTest(TestCase):
     def test_address_field_on_serializer(self):
         serializer = ProfileSerializer()
         self.assertIn('address', serializer.fields)
+
+    def test_cannot_set_umpire_accreditation_to_invalid_entry(self):
+        serializer = ProfileSerializer(data={'umpire_accreditation': 'T'})
+        self.assertEqual(False, serializer.is_valid())
