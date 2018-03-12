@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.test import TestCase
 
 from userprofile.models import Profile
-from utils.models import User
+from user.models import User
 
 
 class UserModelTest(TestCase):
