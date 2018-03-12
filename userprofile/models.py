@@ -17,7 +17,7 @@ class Profile(models.Model):
         ('E', 'E Grade')
     )
 
-    # Fields
+    # System
     created = models.DateTimeField(auto_now_add=True, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
     uuid = models.UUIDField(
@@ -25,6 +25,11 @@ class Profile(models.Model):
         default=uuid_lib.uuid4,
         editable=False
     )
+
+    # Fields
+    name = models.CharField(
+        max_length=255,
+        blank=True)
     address = models.CharField(
         max_length=200,
         blank=True)
