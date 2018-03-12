@@ -1,0 +1,17 @@
+language: python
+python:
+- "3.6"
+# setup environment
+env:
+- DJANGO_VERSION=2.0.2
+- DJANGO_SETTINGS_MODULE='mmpl_rest.settings'
+# install dependencies
+install:
+- pip install -r requirements.txt
+# run test scripts
+script:
+- python manage.py collectstatic --noinput --settings=mmpl_rest.settings
+- coverage run --source=. manage.py test --noinput --settings=mmpl_rest.settings
+# run coveralls after successful tests
+after_success:
+- coveralls

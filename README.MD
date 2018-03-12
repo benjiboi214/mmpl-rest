@@ -1,0 +1,1 @@
+[![Coverage Status](https://coveralls.io/repos/github/benjiboi214/mmpl-rest/badge.svg?branch=master)](https://coveralls.io/github/benjiboi214/mmpl-rest?branch=master)
