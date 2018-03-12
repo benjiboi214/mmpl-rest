@@ -4,7 +4,6 @@ python:
 # setup environment
 env:
 - DJANGO_VERSION=2.0.2
-- DJANGO_SETTINGS_MODULE='mmpl_rest.settings'
 # install dependencies
 install:
 - pip install -r requirements.txt
