@@ -11,7 +11,8 @@ class ProfileSerializer(DefaultModelSerializer):
             'phone_number',
             'umpire_accreditation',
             'created',
-            'last_updated'
+            'last_updated',
+            'uuid'
         ]
 
     # What to test on a serializer?

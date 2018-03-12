@@ -1,3 +1,5 @@
+import uuid as uuid_lib
+
 from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.contrib.auth import get_user_model
@@ -18,6 +20,11 @@ class Profile(models.Model):
     # Fields
     created = models.DateTimeField(auto_now_add=True, editable=False)
     last_updated = models.DateTimeField(auto_now=True, editable=False)
+    uuid = models.UUIDField(
+        db_index=True,
+        default=uuid_lib.uuid4,
+        editable=False
+    )
     address = models.CharField(
         max_length=200,
         blank=True)

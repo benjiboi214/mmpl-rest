@@ -23,3 +23,7 @@ class TestPlayerView(UserProfileBaseTest):
 
     def test_verbose_name_plural(self):
         self.assertEqual(str(Profile._meta.verbose_name_plural), "profiles")
+
+    def test_saving_model_generates_uuid(self):
+        profile = Profile.objects.create()
+        self.assertIsNotNone(profile.uuid)

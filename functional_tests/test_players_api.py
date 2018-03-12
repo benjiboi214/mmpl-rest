@@ -25,7 +25,7 @@ class PlayerFunctionalTests(FunctionalRestTest):
             format='json'
         )
         self.assertEqual(200, response.status_code)
-        self.assertIn('address', response.data)
+        self.assertIn('uuid', response.data)
 
         # User can post and update the address on their profile
         response = self.client.put(
