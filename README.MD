@@ -1,1 +1,2 @@
 [![Coverage Status](https://coveralls.io/repos/github/benjiboi214/mmpl-rest/badge.svg?branch=master)](https://coveralls.io/github/benjiboi214/mmpl-rest?branch=master)
+[![Build Status](https://travis-ci.org/benjiboi214/mmpl-rest.svg?branch=feature%2Fuser-profile)]
