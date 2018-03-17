@@ -1,9 +1,6 @@
-# User can edit, update and otherwise change their player profile.
-# User cannot edit another players profile.
 # If a profile exists without an associated profile, player can claim the profile
 # Admin should recieve confirmation that profile has been claimed awaiting approval.
 # User can input details such as contact details, preferred contact method, address, umpire accreditation.
-# User can enter a preferred Name (screen name?)
 
 from .base import FunctionalRestTest
 
@@ -31,6 +28,7 @@ class PlayerFunctionalTests(FunctionalRestTest):
         response = self.client.put(
             '/players/me/',
             {
+                'name': 'Ben Elliot',
                 'address': '123 Fake Street, Melbourne',
                 'date_of_birth': '1992-04-21',
                 'phone_number': '0429 227 281',
@@ -38,5 +36,61 @@ class PlayerFunctionalTests(FunctionalRestTest):
             },
             format='json'
         )
+        self.assertEqual(200, response.status_code)
+        self.assertEqual('Ben Elliot', response.data['name'])
 
         # Unauthenticated user cannot access same endpoint.
+        self.client.credentials()
+        response = self.client.get(
+            '/players/me/',
+            format='json'
+        )
+        self.assertEqual(401, response.status_code)
+
+    def test_player_profile_list_and_detail(self):
+        response = self.client.get(
+            '/players/',
+            format='json'
+        )
+        self.assertEqual(200, response.status_code)
+        # assert for contents of response.
+
+### Test Cases for Profile CRUD ###
+# User visits /players/
+# User gets a list of players (paginated)
+# User accesses one of the detail endpoints
+# /players/{uuid}/
+# User gets a detail list of specified players
+# User tries to post to modify the specified player, gets denied
+# User authenticates, tries to modify specified player, gets denied
+# User finds their profile by UUID, tries to modify the player, is allowed.
+
+### Test Cases for Profile Request Track ###
+# Profile is created by external process (no user attached)
+# User navigates to profile making get request on player resource
+# /players/{uuid}/
+# Player notices that the profile is theirs, makes post request to /claim endpoint
+# /players/{uuid}/claim (Authenticated)
+# claim endpoint takes the profile, the user and creates an intermediary model ProfileClaim
+# Message posted to the user that the request has been filed
+
+# On ProfileClaim creation, admin gets an email asking for approval of the claim
+# Admin navigates to /players/claims/{uuid} (Admin permissions)
+# Admin can see the which user has claimed which profile
+# Admin can check the verification code to confirm the right human has claimed the right profile.
+
+# If the code is correct, admin posts to /players/claims/{uuid}/approve (Admin only permissions)
+# Internally, take the User and Profile and link
+# Remove request model.
+# Notify User their request was approved.
+
+# If the code in not correct, admin posts to /players/claims/{uuid}/decline (Admin only permissions)
+# Internally, remove the ProfileClaim
+# Notify User their request was declined.
+
+# ProfileClaim Model
+# user = OneToOne with User
+# profile = OneToOne with Profile
+# code = UUID Field for verification
+# (M) = Approve
+# (M) = Decline

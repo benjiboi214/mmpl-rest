@@ -1,5 +1,9 @@
 from django.contrib.auth import get_user_model
 from django.test import TestCase
+from django.urls import resolve
+from rest_framework.test import APIRequestFactory, force_authenticate
+
+from userprofile.views import MyProfileView
 
 
 class UserProfileBaseTest(TestCase):
@@ -16,3 +20,15 @@ class UserProfileBaseTest(TestCase):
         )
         self.user.profile.address = '123 Fake St'
         self.user.profile.save()
+
+    def get_view_response(self, action, url, data=None, user=False):
+        factory = APIRequestFactory()
+        view = resolve(url).func
+        if data:
+            request = getattr(factory, action)(
+                url, data, format='json')
+        else:
+            request = getattr(factory, action)(url)
+        if user:
+            force_authenticate(request, user)
+        return view(request)
