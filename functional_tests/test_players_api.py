@@ -47,23 +47,57 @@ class PlayerFunctionalTests(FunctionalRestTest):
         )
         self.assertEqual(401, response.status_code)
 
-    def test_player_profile_list_and_detail(self):
+    def test_player_profile_list(self):
+        # Unauthenticaed user can GET the list view
         response = self.client.get(
             '/players/',
             format='json'
         )
         self.assertEqual(200, response.status_code)
-        # assert for contents of response.
+        self.assertEqual(2, len(response.data))
 
-### Test Cases for Profile CRUD ###
-# User visits /players/
-# User gets a list of players (paginated)
-# User accesses one of the detail endpoints
-# /players/{uuid}/
-# User gets a detail list of specified players
-# User tries to post to modify the specified player, gets denied
-# User authenticates, tries to modify specified player, gets denied
-# User finds their profile by UUID, tries to modify the player, is allowed.
+        # Unauthenticated user cannot POST the list view
+        response = self.client.post(
+            '/players/',
+            {
+                'name': 'Ben Elliot',
+            },
+            format='json'
+        )
+        self.assertEqual(401, response.status_code)
+
+        # Authenticated user cannot POST the list view
+        response = self.create_jwt(
+            self.other_user['email'], self.other_user['password'])
+        self.other_user['jwt'] = response.data['token']
+        self.client.credentials(
+            HTTP_AUTHORIZATION='JWT ' + self.other_user['jwt'])
+
+        response = self.client.post(
+            '/players/',
+            {
+                'name': 'Ben Elliot',
+            },
+            format='json'
+        )
+        self.assertEqual(403, response.status_code)
+
+        # Authenticated Admin user can POST list view
+        response = self.create_jwt(
+            self.admin_user['email'], self.admin_user['password'])
+        self.admin_user['jwt'] = response.data['token']
+        self.client.credentials(
+            HTTP_AUTHORIZATION='JWT ' + self.admin_user['jwt'])
+
+        response = self.client.post(
+            '/players/',
+            {
+                'name': 'Ben Elliot',
+            },
+            format='json'
+        )
+        self.assertEqual(201, response.status_code)
+
 
 ### Test Cases for Profile Request Track ###
 # Profile is created by external process (no user attached)

@@ -2,7 +2,7 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import permissions
 
-from userprofile.views import MyProfileView
+from userprofile.views import MyProfileView, ProfileViewSet
 
 from .base import UserProfileBaseTest
 
@@ -76,36 +76,8 @@ class TestProfileListView(UserProfileBaseTest):
         self.assertIsNotNone(response.data)
         self.assertEqual(1, len(response.data))
 
-    def test_viewset_list_available_to_unauthenticated_user(self):
-        response = self.get_view_response(
-            'get',
-            reverse('profile-list'),
-            user=None
-        )
-        self.assertEqual(200, response.status_code)
-
-    def test_viewset_list_available_to_authenticated_user(self):
-        response = self.get_view_response(
-            'get',
-            reverse('profile-list'),
-            user=self.user
-        )
-        self.assertEqual(200, response.status_code)
-
-    def test_viewset_list_available_to_admin_user(self):
-        self.admin_details = {
-            'email': 'admin@mail.com',
-            'name': 'Ben Admin',
-            'password': 'AdminPassword01'
-        }
-        self.admin = get_user_model().objects.create_superuser(
-            email=self.admin_details['email'],
-            password=self.admin_details['password'],
-            name=self.admin_details['name']
-        )
-        response = self.get_view_response(
-            'get',
-            reverse('profile-list'),
-            user=self.admin
-        )
-        self.assertEqual(200, response.status_code)
+    def test_viewset_get_queryset_action_list(self):
+        view = ProfileViewSet()
+        view.action = 'list'
+        view_permissions = view.get_permissions()
+        self.assertIsInstance(view_permissions[0], permissions.AllowAny)

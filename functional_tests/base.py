@@ -9,16 +9,27 @@ from rest_framework.test import APIClient
 class FunctionalRestTest(StaticLiveServerTestCase):
     def setUp(self):
         self.client = APIClient()
+        # Regular user for API access
         self.other_user = {
             'email': "otheruser@mail.com",
             'name': "Other User",
             'password': "Password01",
         }
-        test_user = get_user_model().objects.create_user(
+        get_user_model().objects.create_user(
             self.other_user['email'],
-            password=self.other_user['password'])
-        test_user.name = self.other_user['name']
-        test_user.save()
+            password=self.other_user['password'],
+            name=self.other_user['name'])
+        # Admin user for privileged operations
+        self.admin_user = {
+            'email': "admin@mail.com",
+            'name': "Admin User",
+            'password': "Password01",
+        }
+        get_user_model().objects.create_superuser(
+            email=self.admin_user['email'],
+            password=self.admin_user['password'],
+            name=self.admin_user['name']
+        )
 
     def create_jwt(self, email, password):
         return self.client.post(
