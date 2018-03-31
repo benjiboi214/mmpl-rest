@@ -3,8 +3,6 @@ from django.test import TestCase
 from django.urls import resolve
 from rest_framework.test import APIRequestFactory, force_authenticate
 
-from userprofile.views import MyProfileView
-
 
 class UserProfileBaseTest(TestCase):
     def setUp(self):

@@ -2,8 +2,8 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import permissions
 
-from userprofile.views import MyProfileView, ProfileViewSet
-
+from userprofile.views import ProfileMe, ProfileList
+from utils import permissions as custom_permissions
 from .base import UserProfileBaseTest
 
 
@@ -23,12 +23,12 @@ class TestProfileMeView(UserProfileBaseTest):
         self.assertEqual(401, response.status_code)
 
     def test_get_profile_method_success(self):
-        user_profile = MyProfileView.get_player_object(self, self.user)
+        user_profile = ProfileMe.get_player_object(self, self.user)
         self.assertEqual(self.user.profile, user_profile)
 
     def test_get_profile_method_failure(self):
         user = get_user_model().objects.create()
-        user_profile = MyProfileView.get_player_object(self, user)
+        user_profile = ProfileMe.get_player_object(self, user)
         self.assertEqual(user.profile, user_profile)
 
     def test_get_returns_correct_profile(self):
@@ -77,7 +77,10 @@ class TestProfileListView(UserProfileBaseTest):
         self.assertEqual(1, len(response.data))
 
     def test_viewset_get_queryset_action_list(self):
-        view = ProfileViewSet()
+        view = ProfileList()
         view.action = 'list'
         view_permissions = view.get_permissions()
-        self.assertIsInstance(view_permissions[0], permissions.AllowAny)
+        self.assertIsInstance(
+            view_permissions[0],
+            custom_permissions.IsAdminOrReadOnly
+        )

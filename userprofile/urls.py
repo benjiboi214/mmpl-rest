@@ -1,5 +1,4 @@
 from django.urls import include, path
-from rest_framework import routers
 
 from userprofile import views
 
@@ -9,10 +8,20 @@ from userprofile import views
 # # Can be done with the readonly viewset
 
 
-urlpatterns = [path('players/me/',
-                    views.MyProfileView.as_view(),
-                    name='profile-me')]
-
-router = routers.SimpleRouter()
-router.register(r'players', views.ProfileViewSet)
-urlpatterns += router.urls
+urlpatterns = [
+    path(
+        'players/',
+        views.ProfileList.as_view(),
+        name='profile-list'
+    ),
+    path(
+        'players/me/',
+        views.ProfileMe.as_view(),
+        name='profile-me'
+    ),
+    path(
+        'players/<uuid>/',
+        views.ProfileDetail.as_view(),
+        name='profile-detail'
+    )
+]
