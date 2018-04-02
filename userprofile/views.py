@@ -31,7 +31,7 @@ class ProfileDetail(mixins.RetrieveModelMixin,
     serializer_class = ProfileSerializer
     permission_classes = (
         custom_permissions.IsAdminOrReadOnly,
-        custom_permissions.IsAuthenticatedAndProfileOwner,
+        custom_permissions.IsAuthenticatedAndProfileOwnerOrReadOnly,
     )
     lookup_field = 'uuid'
 

@@ -2,9 +2,10 @@ from django.contrib.auth import get_user_model
 from django.urls import reverse
 from rest_framework import permissions
 
-from userprofile.views import ProfileMe, ProfileList
+from userprofile.views import ProfileMe, ProfileList, ProfileDetail
 from utils import permissions as custom_permissions
 from .base import UserProfileBaseTest
+from userprofile.models import Profile
 
 
 class TestProfileMeView(UserProfileBaseTest):
@@ -67,7 +68,7 @@ class TestProfileMeView(UserProfileBaseTest):
 
 class TestProfileListView(UserProfileBaseTest):
 
-    def test_viewset_list_shows_list_of_profiles(self):
+    def test_get_shows_list_of_profiles(self):
         response = self.get_view_response(
             'get',
             reverse('profile-list'),
@@ -76,11 +77,35 @@ class TestProfileListView(UserProfileBaseTest):
         self.assertIsNotNone(response.data)
         self.assertEqual(1, len(response.data))
 
-    def test_viewset_get_queryset_action_list(self):
+    def test_get_permissions_instance(self):
         view = ProfileList()
-        view.action = 'list'
+        view.action = 'get'
         view_permissions = view.get_permissions()
         self.assertIsInstance(
             view_permissions[0],
             custom_permissions.IsAdminOrReadOnly
+        )
+
+
+class TestProfileDetailView(UserProfileBaseTest):
+
+    def test_get_shows_specific_profile(self):
+        response = self.get_view_response(
+            'get',
+            reverse('profile-detail', args=[self.user.profile.uuid]),
+            uuid=self.user.profile.uuid
+        )
+        self.assertEqual(self.user.profile.uuid.__str__(), response.data['uuid'])
+    
+    def test_get_permissions_instance(self):
+        view = ProfileDetail()
+        view.action = 'get'
+        view_permissions = view.get_permissions()
+        self.assertIsInstance(
+            view_permissions[0],
+            custom_permissions.IsAdminOrReadOnly
+        )
+        self.assertIsInstance(
+            view_permissions[1],
+            custom_permissions.IsAuthenticatedAndProfileOwnerOrReadOnly
         )

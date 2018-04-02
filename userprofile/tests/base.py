@@ -19,7 +19,7 @@ class UserProfileBaseTest(TestCase):
         self.user.profile.address = '123 Fake St'
         self.user.profile.save()
 
-    def get_view_response(self, action, url, data=None, user=False):
+    def get_view_response(self, action, url, data=None, user=False, uuid=None):
         factory = APIRequestFactory()
         view = resolve(url).func
         if data:
@@ -29,4 +29,7 @@ class UserProfileBaseTest(TestCase):
             request = getattr(factory, action)(url)
         if user:
             force_authenticate(request, user)
-        return view(request)
+        if uuid:
+            return view(request, uuid=uuid)
+        else:
+            return view(request)
