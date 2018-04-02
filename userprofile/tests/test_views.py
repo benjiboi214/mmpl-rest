@@ -75,7 +75,7 @@ class TestProfileListView(UserProfileBaseTest):
         )
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.data)
-        self.assertEqual(1, len(response.data))
+        self.assertEqual(2, len(response.data))
 
     def test_get_permissions_instance(self):
         view = ProfileList()
@@ -89,14 +89,6 @@ class TestProfileListView(UserProfileBaseTest):
 
 class TestProfileDetailView(UserProfileBaseTest):
 
-    def test_get_shows_specific_profile(self):
-        response = self.get_view_response(
-            'get',
-            reverse('profile-detail', args=[self.user.profile.uuid]),
-            uuid=self.user.profile.uuid
-        )
-        self.assertEqual(self.user.profile.uuid.__str__(), response.data['uuid'])
-    
     def test_get_permissions_instance(self):
         view = ProfileDetail()
         view.action = 'get'
@@ -109,3 +101,38 @@ class TestProfileDetailView(UserProfileBaseTest):
             view_permissions[1],
             custom_permissions.IsAuthenticatedAndProfileOwnerOrReadOnly
         )
+
+    def test_update_profile(self):
+        url = reverse('profile-detail', args=[self.user.profile.uuid])
+        update_data = {'name': 'New Name!'}
+        request = self.get_request(
+            url,
+            action='put',
+            data=update_data,
+            user=self.admin_user)
+        response = ProfileDetail.as_view()(
+            request,
+            uuid=self.user.profile.uuid)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(update_data['name'], response.data['name'])
+
+    def test_delete_profile(self):
+        url = reverse('profile-detail', args=[self.user.profile.uuid])
+        request = self.get_request(
+            url, action='delete',
+            user=self.admin_user)
+        response = ProfileDetail.as_view()(
+            request,
+            uuid=self.user.profile.uuid)
+        self.assertEqual(204, response.status_code)
+
+    def test_get_profile(self):
+        url = reverse('profile-detail', args=[self.user.profile.uuid])
+        request = self.get_request(url)
+        response = ProfileDetail.as_view()(
+            request,
+            uuid=self.user.profile.uuid)
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(
+            self.user.profile.uuid.__str__(),
+            response.data['uuid'])
