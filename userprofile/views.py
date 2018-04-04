@@ -52,8 +52,6 @@ class ProfileMe(APIView):
         obj, created = Profile.objects.get_or_create(user=user)
         if obj or created:
             return obj
-        else:
-            raise Http404
 
     def get(self, request, format=None):
         profile = self.get_player_object(request.user)
