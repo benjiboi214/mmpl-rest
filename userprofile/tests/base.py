@@ -39,18 +39,3 @@ class UserProfileBaseTest(TestCase):
         if user:
             force_authenticate(request, user)
         return request
-
-    def get_view_response(self, action, url, data=None, user=False, uuid=None):
-        factory = APIRequestFactory()
-        view = resolve(url).func
-        if data:
-            request = getattr(factory, action)(
-                url, data, format='json')
-        else:
-            request = getattr(factory, action)(url)
-        if user:
-            force_authenticate(request, user)
-        if uuid:
-            return view(request, uuid=uuid)
-        else:
-            return view(request)

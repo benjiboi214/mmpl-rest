@@ -10,19 +10,6 @@ from userprofile.models import Profile
 
 class TestProfileMeView(UserProfileBaseTest):
 
-    def test_view_available_to_authenticated_user(self):
-        response = self.get_view_response(
-            'get',
-            reverse('profile-me'),
-            user=self.user)
-        self.assertEqual(200, response.status_code)
-
-    def test_view_not_available_to_unauthenticated_user(self):
-        response = self.get_view_response(
-            'get',
-            reverse('profile-me'))
-        self.assertEqual(401, response.status_code)
-
     def test_get_profile_method_success(self):
         user_profile = ProfileMe.get_player_object(self, self.user)
         self.assertEqual(self.user.profile, user_profile)
@@ -32,35 +19,51 @@ class TestProfileMeView(UserProfileBaseTest):
         user_profile = ProfileMe.get_player_object(self, user)
         self.assertEqual(user.profile, user_profile)
 
+    def test_view_available_to_authenticated_user(self):
+        url = reverse('profile-me')
+        request = self.get_request(url, user=self.user)
+        response = ProfileMe.as_view()(request)
+        self.assertEqual(200, response.status_code)
+
+    def test_view_not_available_to_unauthenticated_user(self):
+        url = reverse('profile-me')
+        request = self.get_request(url)
+        response = ProfileMe.as_view()(request)
+        self.assertEqual(401, response.status_code)
+
     def test_get_returns_correct_profile(self):
-        response = self.get_view_response(
-            'get',
-            reverse('profile-me'),
-            user=self.user)
+        url = reverse('profile-me')
+        request = self.get_request(url, user=self.user)
+        response = ProfileMe.as_view()(request)
         self.assertEqual(200, response.status_code)
         self.assertEqual(self.user.profile.address, response.data['address'])
 
     def test_put_updates_profile(self):
-        new_address = '321 Ekaf Ts'
-        response = self.get_view_response(
-            'put',
-            reverse('profile-me'),
-            data={'address': new_address},
+        url = reverse('profile-me')
+        update_data = {'address': '321 Ekaf Ts'}
+        request = self.get_request(
+            url,
+            action='put',
+            data=update_data,
             user=self.user)
-        self.assertEqual(new_address, response.data['address'])
+        response = ProfileMe.as_view()(request)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(update_data['address'], response.data['address'])
 
     def test_put_invalid_data_throws_error(self):
-        long_address = '''
+        url = reverse('profile-me')
+        update_data = {'address': '''
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Pellentesque
         tincidunt neque quis ullamcorper blandit. Pellentesque sit amet
         pharetra dolor. Sed in posuere velit. Curabitur eu auctor magna.
-        Blah Blah.o
-        '''
-        response = self.get_view_response(
-            'put',
-            reverse('profile-me'),
-            data={'address': long_address},
-            user=self.user)
+        Blah Blah.o '''}
+        request = self.get_request(
+            url,
+            action='put',
+            data=update_data,
+            user=self.user
+        )
+        response = ProfileMe.as_view()(request)
         self.assertEqual(400, response.status_code)
         self.assertIn(
             'no more than 200 characters.', response.data['address'][0])
@@ -69,10 +72,9 @@ class TestProfileMeView(UserProfileBaseTest):
 class TestProfileListView(UserProfileBaseTest):
 
     def test_get_shows_list_of_profiles(self):
-        response = self.get_view_response(
-            'get',
-            reverse('profile-list'),
-        )
+        url = reverse('profile-list')
+        request = self.get_request(url)
+        response = ProfileList.as_view()(request)
         self.assertEqual(200, response.status_code)
         self.assertIsNotNone(response.data)
         self.assertEqual(2, len(response.data))
