@@ -30,7 +30,6 @@ class ProfileDetail(mixins.RetrieveModelMixin,
     queryset = Profile.objects.all()
     serializer_class = ProfileSerializer
     permission_classes = (
-        custom_permissions.IsAdminOrReadOnly,
         custom_permissions.IsAuthenticatedAndProfileOwnerOrReadOnly,
     )
     lookup_field = 'uuid'

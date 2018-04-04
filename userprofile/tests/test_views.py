@@ -97,14 +97,10 @@ class TestProfileDetailView(UserProfileBaseTest):
         view_permissions = view.get_permissions()
         self.assertIsInstance(
             view_permissions[0],
-            custom_permissions.IsAdminOrReadOnly
-        )
-        self.assertIsInstance(
-            view_permissions[1],
             custom_permissions.IsAuthenticatedAndProfileOwnerOrReadOnly
         )
 
-    def test_update_profile(self):
+    def test_admin_update_profile(self):
         url = reverse('profile-detail', args=[self.user.profile.uuid])
         update_data = {'name': 'New Name!'}
         request = self.get_request(
@@ -112,6 +108,20 @@ class TestProfileDetailView(UserProfileBaseTest):
             action='put',
             data=update_data,
             user=self.admin_user)
+        response = ProfileDetail.as_view()(
+            request,
+            uuid=self.user.profile.uuid)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(update_data['name'], response.data['name'])
+
+    def test_user_update_own_profile(self):
+        url = reverse('profile-detail', args=[self.user.profile.uuid])
+        update_data = {'name': 'New Name!'}
+        request = self.get_request(
+            url,
+            action='put',
+            data=update_data,
+            user=self.user)
         response = ProfileDetail.as_view()(
             request,
             uuid=self.user.profile.uuid)
