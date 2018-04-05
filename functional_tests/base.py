@@ -8,28 +8,51 @@ from rest_framework.test import APIClient
 
 class FunctionalRestTest(StaticLiveServerTestCase):
     def setUp(self):
+        self.created_users = 0
         self.client = APIClient()
-        # Regular user for API access
-        self.other_user = {
-            'email': "otheruser@mail.com",
-            'name': "Other User",
+
+    def create_staff_user(self):
+        self.staff_user_details = {
+            'email': "staff@mail.com",
+            'name': "Staff User",
             'password': "Password01",
         }
-        get_user_model().objects.create_user(
-            self.other_user['email'],
-            password=self.other_user['password'],
-            name=self.other_user['name'])
-        # Admin user for privileged operations
-        self.admin_user = {
-            'email': "admin@mail.com",
-            'name': "Admin User",
-            'password': "Password01",
-        }
-        get_user_model().objects.create_superuser(
-            email=self.admin_user['email'],
-            password=self.admin_user['password'],
-            name=self.admin_user['name']
+        self.staff_user = get_user_model().objects.create_user(
+            self.staff_user_details['email'],
+            password=self.staff_user_details['password'],
+            name=self.staff_user_details['name']
         )
+        self.staff_user.is_staff = True
+        self.staff_user.save()
+        self.created_users += 1
+        return self.staff_user_details
+
+    def create_user(self):
+        self.user_details = {
+            'email': 'user@mail.com',
+            'name': 'Regular User',
+            'password': 'Password01'
+        }
+        self.user = get_user_model().objects.create_user(
+            self.user_details['email'],
+            password=self.user_details['password'],
+            name=self.user_details['name']
+        )
+        self.user.save()
+        self.created_users += 1
+        return self.user_details
+
+    def authenticate(self, user_details=None):
+        if user_details:
+            token = self.create_jwt(
+                user_details['email'],
+                user_details['password']
+            ).data['token']
+            self.client.credentials(HTTP_AUTHORIZATION='JWT ' + token)
+            return token
+        else:
+            self.client.credentials()
+            return None
 
     def create_jwt(self, email, password):
         return self.client.post(
