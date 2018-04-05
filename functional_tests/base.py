@@ -41,6 +41,21 @@ class FunctionalRestTest(StaticLiveServerTestCase):
         self.user.save()
         self.created_users += 1
         return self.user_details
+    
+    def create_other_user(self):
+        self.other_user_details = {
+            'email': 'other_user@mail.com',
+            'name': 'Other Regular User',
+            'password': 'Password01'
+        }
+        self.other_user = get_user_model().objects.create_user(
+            self.other_user_details['email'],
+            password=self.other_user_details['password'],
+            name=self.other_user_details['name']
+        )
+        self.other_user.save()
+        self.created_users += 1
+        return self.other_user_details
 
     def authenticate(self, user_details=None):
         if user_details:

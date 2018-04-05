@@ -183,7 +183,7 @@ class AuthFunctionalTests(FunctionalRestTest):
 
     def test_can_refresh_and_verify_jwt(self):
         user_details = self.create_user()
-        
+
         # Existing User logs in by creating new JWT.
         response = self.create_jwt(
             user_details['email'], user_details['password'])

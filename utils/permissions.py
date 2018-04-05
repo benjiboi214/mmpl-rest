@@ -22,5 +22,7 @@ class IsAuthenticatedAndProfileOwnerOrReadOnly(
         else:
             if request.user.is_superuser or request.user.is_staff:
                 return True
+            elif request.method == 'DELETE':
+                return False
             else:
                 return obj.user == request.user
