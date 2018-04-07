@@ -45,3 +45,30 @@ class Profile(TimeStampedUuidModel):
 
     def __str__(self):
         return self.user.name
+
+
+class Claim(TimeStampedUuidModel):
+
+    # Fields
+    id_code = models.CharField(
+        max_length=20,
+        blank=True
+    )
+
+    # Relationship Fields
+    user = models.OneToOneField(
+        settings.AUTH_USER_MODEL,
+        on_delete=models.CASCADE,
+        related_name="profile_claim"
+    )
+    profile = models.OneToOneField(
+        Profile,
+        on_delete=models.CASCADE,
+        related_name="claim"
+    )
+
+    def __unicode__(self):
+        return u'%s' % self.user.name
+
+    def __str__(self):
+        return self.user.name

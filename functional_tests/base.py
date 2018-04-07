@@ -8,7 +8,7 @@ from rest_framework.test import APIClient
 
 class FunctionalRestTest(StaticLiveServerTestCase):
     def setUp(self):
-        self.created_users = 0
+        self.created_profiles = 0
         self.client = APIClient()
 
     def create_staff_user(self):
@@ -24,7 +24,7 @@ class FunctionalRestTest(StaticLiveServerTestCase):
         )
         self.staff_user.is_staff = True
         self.staff_user.save()
-        self.created_users += 1
+        self.created_profiles += 1
         return self.staff_user_details
 
     def create_user(self):
@@ -39,9 +39,9 @@ class FunctionalRestTest(StaticLiveServerTestCase):
             name=self.user_details['name']
         )
         self.user.save()
-        self.created_users += 1
+        self.created_profiles += 1
         return self.user_details
-    
+
     def create_other_user(self):
         self.other_user_details = {
             'email': 'other_user@mail.com',
@@ -54,7 +54,7 @@ class FunctionalRestTest(StaticLiveServerTestCase):
             name=self.other_user_details['name']
         )
         self.other_user.save()
-        self.created_users += 1
+        self.created_profiles += 1
         return self.other_user_details
 
     def authenticate(self, user_details=None):

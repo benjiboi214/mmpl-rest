@@ -151,7 +151,7 @@ class AuthenticatedUserFunctionalTests(FunctionalRestTest):
             format='json'
         )
         self.assertEqual(403, response.status_code)
-    
+
         # Authenticated User canot DELETE
         response = self.client.delete(
             '/players/' + self.user.profile.uuid.__str__() + '/',
@@ -171,7 +171,7 @@ class AnonUserFunctionalTests(FunctionalRestTest):
             format='json'
         )
         self.assertEqual(200, response.status_code)
-        self.assertEqual(self.created_users, len(response.data))
+        self.assertEqual(self.created_profiles, len(response.data))
 
         # Unauthenticated user cannot POST the list view
         response = self.client.post(
@@ -220,3 +220,15 @@ class AnonUserFunctionalTests(FunctionalRestTest):
             format='json'
         )
         self.assertEqual(401, response.status_code)
+
+
+# Admin should get a list of claims irrespective of players /players/claims/
+# Admin should be able to select specific request to get detail and verify. /players/claims/<uuid>/
+#
+# User should have a claim action on a profile-detail /players/<uuid>/claim
+# User should have a /players/claims/ endpoint to show their claims
+# For above if authenticated, return array, empty or not.
+#
+# Anon user should see none of the above.
+
+
