@@ -19,6 +19,8 @@ class TestPlayerView(UserProfileBaseTest):
         self.assertIsNone(profile.user)
 
     def test_string_representation(self):
+        self.user.profile.name = self.user_details['name']
+        self.user.profile.save()
         self.assertEqual(self.user_details['name'], str(self.user.profile))
 
     def test_verbose_name_plural(self):

@@ -41,7 +41,7 @@ class Profile(TimeStampedUuidModel):
         related_name="profile")
 
     def __unicode__(self):
-        return u'%s' % self.user.name
+        return u'%s' % self.name
 
     def __str__(self):
-        return self.user.name
+        return self.name
