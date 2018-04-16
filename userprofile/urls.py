@@ -20,6 +20,11 @@ urlpatterns = [
         name='profile-me'
     ),
     path(
+        'players/claims/',
+        views.ClaimList.as_view(),
+        name='claim-list'
+    ),
+    path(
         'players/<uuid>/',
         views.ProfileDetail.as_view(),
         name='profile-detail'

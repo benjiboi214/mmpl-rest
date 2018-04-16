@@ -3,9 +3,10 @@ from django.shortcuts import render
 from rest_framework import permissions, status, viewsets, generics, mixins
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from django.db.models import ObjectDoesNotExist
 
-from userprofile.models import Profile
-from userprofile.serializers import ProfileSerializer
+from userprofile.models import Profile, Claim
+from userprofile.serializers import ProfileSerializer, ClaimSerializer
 from utils import permissions as custom_permissions
 
 
@@ -53,15 +54,35 @@ class ProfileMe(APIView):
         if obj or created:
             return obj
 
-    def get(self, request, format=None):
+    def get(self, request, *args, **kwarg):
         profile = self.get_player_object(request.user)
         serializer = ProfileSerializer(profile)
         return Response(serializer.data)
 
-    def put(self, request, format=None):
+    def put(self, request, *args, **kwarg):
         profile = self.get_player_object(request.user)
         serializer = ProfileSerializer(profile, data=request.data)
         if serializer.is_valid():
             serializer.save()
             return Response(serializer.data)
         return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+
+class ClaimList(mixins.ListModelMixin,
+                generics.GenericAPIView):
+    queryset = Claim.objects.all()
+    serializer_class = ClaimSerializer
+    permission_classes = (
+        permissions.IsAuthenticated,
+    )
+
+    def get(self, request, *args, **kwarg):
+        if request.user.is_staff:
+            return self.list(request, *args, **kwarg)
+        elif request.user.is_authenticated:
+            try:
+                claim = Claim.objects.get(user=request.user)
+                serializer = ClaimSerializer(claim)
+                return Response([serializer.data])
+            except ObjectDoesNotExist:
+                return Response([])

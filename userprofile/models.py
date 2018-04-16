@@ -41,10 +41,10 @@ class Profile(TimeStampedUuidModel):
         related_name="profile")
 
     def __unicode__(self):
-        return u'%s' % self.user.name
+        return u'%s' % self.name
 
     def __str__(self):
-        return self.user.name
+        return self.name
 
 
 class Claim(TimeStampedUuidModel):
@@ -67,6 +67,14 @@ class Claim(TimeStampedUuidModel):
         related_name="claim"
     )
 
+    # Model Methods (Business Logic)
+    def reject_claim(self):
+        pass
+
+    def accept_claim(self):
+        pass
+
+    # Helper Methods
     def __unicode__(self):
         return u'%s' % self.user.name
 

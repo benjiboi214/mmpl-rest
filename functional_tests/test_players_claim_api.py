@@ -22,7 +22,7 @@ class ClaimRestTest(FunctionalRestTest):
         return user
 
     def create_profile(self):
-        profile = Profile.objects.create()
+        profile = Profile.objects.create(name=f'unpaired_{self.created_profiles}')
         profile.save()
         self.created_profiles += 1
         return profile
@@ -103,3 +103,12 @@ class AnonUserFunctionalTests(ClaimRestTest):
     def test_player_claim_action_endpoint(self):
         # Anon user should not be able to use the claim action.
         pass
+
+# /players/claim adds a claim with an id for the user and the profile.
+# claim ID should be provided in browser, and via email.
+# /players/claims/ will provide a list of claims depending on whether admin or your claim.
+# /players/claims/<uuid>/ will provide detail on the specific claim.
+# Admin will see any of the claims in the above list.
+# User will see only their own claim, and none others.
+# /players/claims/<uuid>/approve will approve the given claim, connect the user, profile, and remove the claim.
+# /players/claims/<uuid>/reject will reject the claim, remove the claim model.
