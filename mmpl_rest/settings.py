@@ -15,6 +15,7 @@ import datetime
 
 # Build paths inside the project like this: os.path.join(BASE_DIR, ...)
 BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+PROJECT_ROOT = os.path.dirname(os.path.abspath(__file__))
 
 
 # Quick-start development settings - unsuitable for production
@@ -32,6 +33,7 @@ ALLOWED_HOSTS = []
 # Application definition
 
 INSTALLED_APPS = [
+    'user',
     'django.contrib.admin',
     'django.contrib.auth',
     'django.contrib.contenttypes',
@@ -41,6 +43,8 @@ INSTALLED_APPS = [
     'rest_framework',
     'authtools',
     'djoser',
+    'utils',
+    'userprofile'
 ]
 
 MIDDLEWARE = [
@@ -122,11 +126,12 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/2.0/howto/static-files/
 
 STATIC_URL = '/static/'
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
 
-## Auth Settings
+# Auth Settings
 
 # Set the custom user model with the email Base User.
-AUTH_USER_MODEL = 'authtools.User'
+AUTH_USER_MODEL = 'user.User'
 
 # Rest Framework settings
 REST_FRAMEWORK = {
